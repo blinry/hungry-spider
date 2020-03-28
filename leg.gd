@@ -4,10 +4,7 @@ var l = 1 # limb length
 
 export var target = Vector3(0, 0, 0)
 var internal_target = Vector3(0, 0, 0)
-
-func _ready():
-    pass
-
+   
 func _process(delta):
     internal_target = lerp(internal_target, target, 0.4)
     $Pivot.look_at(internal_target, Vector3(0, 1, 0))

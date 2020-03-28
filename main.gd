@@ -9,12 +9,18 @@ var mind = 0.5
 var maxrot = PI/4
 var radius = 1.3
 
+var internal_height = 0.3
+#var height = 0.3
+var acc = 0
+
 func _ready():
     var leg = preload("res://leg.tscn")
     for i in range(0,8):
         var l = leg.instance()
         l.target = Vector3(sin(i/8.0*2*PI)*radius, 0, cos(i/8.0*2*PI)*radius)
         l.rotation.y = PI+atan2(l.target.x, l.target.z)
+        var r2 = 0.35
+        l.translation = Vector3(sin(i/8.0*2*PI)*r2, 0, cos(i/8.0*2*PI)*r2)
         $Spider.add_child(l)
         legs.push_back(l)
     
@@ -23,12 +29,29 @@ func _process(delta):
     var mouse = get_viewport().get_mouse_position()
     var pos = plane.intersects_ray(camera.project_ray_origin(mouse), camera.project_ray_normal(mouse))
     
+    #internal_height = 0.5
+    
+    if Input.is_action_just_released("lower"):
+        acc = 25
+        
+    #internal_height = lerp(internal_height, height, 0.8)
+    
+    internal_height += acc*delta
+    acc -= 100*delta
+        
+    if internal_height < 0.3:
+        internal_height = 0.3
+    
+    if Input.is_action_pressed("lower"):
+        internal_height = 0.1
+        
     if pos:
+        pos.y = internal_height
         $Spider.translation = lerp($Spider.translation, pos, 0.3)
     
     for i in range(legs.size()):
         var l = legs[i]
-        if l.distance() > maxd or l.distance() < mind or abs(l.rot()) > maxrot:
+        if l.distance() > maxd or l.distance() < mind or abs(l.rot()) > maxrot or randi() % 200 == 0:
             var new_target = Vector3($Spider.translation.x+sin(i/8.0*2*PI)*radius, 0, $Spider.translation.z+cos(i/8.0*2*PI)*radius)
             #$Tween.interpolate_property(l, "target", l.target, , 0.5, Tween.TRANS_LINEAR, Tween.EASE_OUT)
             l.target = new_target
